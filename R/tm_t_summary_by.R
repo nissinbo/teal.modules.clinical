@@ -174,15 +174,20 @@ template_summary_by <- function(parentname,
     )
   }
 
+  sum_var_labels <- var_labels[sum_vars]
+  var_labels[is.na(sum_var_labels)] <- sum_vars[is.na(sum_var_labels)] # Set as varname
+
   env_vars <- list(
     sum_vars = sum_vars,
     sum_var_labels = var_labels[sum_vars],
     na.rm = na.rm,
     na_level = na_level,
     denom = ifelse(denominator == "n", "n", "N_col"),
-    stats = c(
-      numeric_stats,
-      ifelse(denominator == "omit", "count", "count_fraction")
+    stats = unique(
+      c(
+        numeric_stats,
+        ifelse(denominator == "omit", "count", "count_fraction")
+      )
     )
   )
 
@@ -445,6 +450,7 @@ tm_t_summary_by <- function(label,
                             useNA = c("ifany", "no"), # nolint: object_name.
                             na_level = tern::default_na_str(),
                             numeric_stats = c("n", "mean_sd", "median", "range"),
+                            categorical_stats = c("n", "count"),
                             denominator = teal.transform::choices_selected(c("n", "N", "omit"), "omit", fixed = TRUE),
                             drop_arm_levels = TRUE,
                             drop_zero_levels = TRUE,
@@ -473,12 +479,18 @@ tm_t_summary_by <- function(label,
   checkmate::assert_flag(row_groups)
   checkmate::assert_flag(drop_arm_levels)
   checkmate::assert_character(numeric_stats, min.len = 1)
+  checkmate::assert_character(categorical_stats, min.len = 1)
   checkmate::assert_class(pre_output, classes = "shiny.tag", null.ok = TRUE)
   checkmate::assert_class(post_output, classes = "shiny.tag", null.ok = TRUE)
   checkmate::assert_class(basic_table_args, "basic_table_args")
 
   numeric_stats_choices <- c("n", "mean_sd", "mean_ci", "geom_mean", "median", "median_ci", "quantiles", "range")
   numeric_stats <- match.arg(numeric_stats, numeric_stats_choices, several.ok = TRUE)
+
+  categorical_stats_choices <- c("n", "count", "count_fraction", "count_fraction_fixed_dp", "fraction", "n_blq")
+  categorical_stats <- match.arg(categorical_stats, categorical_stats_choices, several.ok = TRUE)
+
+  numeric_stats <- unique(c(numeric_stats, categorical_stats))
 
   assert_decorators(decorators, "table")
 

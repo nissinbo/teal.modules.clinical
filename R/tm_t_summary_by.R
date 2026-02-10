@@ -174,9 +174,6 @@ template_summary_by <- function(parentname,
     )
   }
 
-  sum_var_labels <- var_labels[sum_vars]
-  var_labels[is.na(sum_var_labels)] <- sum_vars[is.na(sum_var_labels)] # Set as varname
-
   env_vars <- list(
     sum_vars = sum_vars,
     sum_var_labels = var_labels[sum_vars],
